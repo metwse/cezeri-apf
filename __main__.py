@@ -18,10 +18,27 @@ if __name__ == "__main__":
     for obs in obstacles:
         engine.new_obstacle(*obs)
 
-    obj = ui.engine.new_object(32, 480, target_velocity=64)
-    obj.set_target(480, 32)
+    objects = [
+        ui.engine.new_object(32, 32, pathfinding_velocity=64, velocity=128),
+        ui.engine.new_object(32, 480, pathfinding_velocity=64, velocity=128),
+    ]
 
-    ui.root.bind("<Button-1>", lambda event: obj.set_pos(event.x, event.y)) 
+    targets = [
+        [(480, 480), (32, 32)],
+        [(480, 32), (232, 280)],
+        [(32, 480), (480, 32)]
+    ]
 
-    engine.run_multithreaded()
+    def next_target():
+        if len(targets) == 0:
+            return
+        for (i, target) in enumerate(targets.pop()):
+            objects[i].set_target(*target)
+            engine.find_path()
+
+    next_target()
+    ui.on_reached = next_target
+
+    engine.find_path()
+    ui.walk_path_multithreaded()
     ui.mainloop()

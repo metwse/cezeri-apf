@@ -47,29 +47,74 @@ class Object:
         x: float,
         y: float,
         r: float = 8,
-        target_velocity: float = 16
+        velocity: float = 16,
+        acceleration: float = 8,
+        pathfinding_velocity: float = 16,
+        target_radius: float = None,
     ):
+        self.r = r
+        if target_radius is not None:
+            self.target_radius = target_radius
+        else:
+            self.target_radius = r
+        self.set_pos(x, y)
+        self.velocity = velocity
+        self.acceleration = acceleration
+        self.pathfinding_velocity = pathfinding_velocity
+
         self.v = None
         self.target = None
-        self.r = r
-        self.set_pos(x, y)
-        self.target_velocity = target_velocity
+        self.reached = False
+        self.path_found = False
+        self.path = []
+        self.path_length = 0
 
     def set_pos(self, x: float, y: float):
         self.x = x
         self.y = y
 
     def set_target(self, x: float, y: float):
-        self.target = [x, y]
         self.v = [0, 0]
+        self.target = [x, y]
+        self.reached = False
+        self.path_found = False
+        self.path = [(self.x, self.y)]
+        self.path_length = 0
 
     # Clears target.
     def unset_target(self):
         self.target = None
         self.v = None
 
-    # Calculates angle and distance to line.
-    # This code is highly optimized, so it might be difficult to read.
+    def append_path(self):
+        distance_to_previous_point = math.sqrt(
+            (self.x - self.path[-1][0]) ** 2 +
+            (self.y - self.path[-1][1]) ** 2
+        )
+        self.path_length += distance_to_previous_point
+        self.path.append((
+            self.x,
+            self.y,
+            distance_to_previous_point
+        ))
+
+    # Calculates the distance to the target.
+    # returns distance
+    def distance_to_target(self):
+        return math.sqrt(
+                (self.x - self.target[0]) ** 2 + (self.y - self.target[1]) ** 2
+            )
+
+    # Calculates the distance and angle to a object.
+    # returns [distance, angle]
+    def distance_to_object(self, other):
+        return [
+            math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2),
+            math.atan2(self.y - other.y, self.x - other.x)
+        ]
+
+    # Calculates the distance and angle to an line.
+    # This code is highly optimized; therefore, it might be difficult to read.
     # returns [distance, angle]
     def distance_to_obstacle(self, obs: Obstacle):
         rotated_point = obs.apply_rotation(self.x, self.y)
