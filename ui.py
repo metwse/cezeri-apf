@@ -15,9 +15,9 @@ def interpolation(a, b, t):
 
 class UI:
     def __init__(
-            self,
-            engine: Engine,
-            fps: float = 75
+        self,
+        engine: Engine,
+        fps: float = 75
     ):
         self.engine = engine
         self.fps = fps

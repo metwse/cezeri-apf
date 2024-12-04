@@ -5,18 +5,18 @@ import math
 
 class Engine:
     def __init__(
-            self,
-            # size of the arena
-            size: [int, int],
-            # frequency of the physics simulation
-            frequency: float = 500,
-            # maximum number of iterations
-            max_iter: int = 50000,
-            # saves location to path once per resolution iterations
-            resolution: int = 10,
-            repulsive_gain: float = 64,
-            obstacle_avoidence_radius: float = 32,
-            object_avoidence_radius: float = 32,
+        self,
+        # size of the arena
+        size: [int, int],
+        # frequency of the physics simulation
+        frequency: float = 500,
+        # maximum number of iterations
+        max_iter: int = 50000,
+        # saves location to path once per resolution iterations
+        resolution: int = 10,
+        repulsive_gain: float = 256,
+        obstacle_avoidence_radius: float = 32,
+        object_avoidence_radius: float = 64,
     ):
         self.objects = []
         self.obstacles = []

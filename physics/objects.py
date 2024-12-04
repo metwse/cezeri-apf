@@ -3,10 +3,10 @@ import math
 
 class Obstacle:
     def __init__(
-            self,
-            a: [float, float],
-            b: [float, float],
-            width: float = 8
+        self,
+        a: [float, float],
+        b: [float, float],
+        width: float = 8
      ):
         self.set_pos(a, b)
         self.width = width
