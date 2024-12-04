@@ -31,7 +31,6 @@ class UI:
         self.canvas.pack(fill=tk.BOTH, expand=1)
 
     def mainloop(self):
-        self.draw(recursive=True)
         self.root.mainloop()
 
     def draw(self, recursive=False):
@@ -78,6 +77,17 @@ class UI:
                 )
 
         self.root.update()
+
+    def draw_path(self, paths):
+        self.draw()
+
+        for path in paths:
+            for pos in path:
+                self.canvas.create_oval(
+                    pos[0] - 1, pos[1] - 1,
+                    pos[0] + 1, pos[1] + 1,
+                    fill="white"
+                )
 
     def walk_path_multithreaded(self):
         threading.Thread(target=self.walk_path).start()

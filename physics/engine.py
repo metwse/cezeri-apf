@@ -3,6 +3,10 @@ from .objects import Obstacle, Object
 import math
 
 
+def interpolation(a, b, t):
+    return (b - a) * t + a
+
+
 class Engine:
     def __init__(
         self,
@@ -38,12 +42,20 @@ class Engine:
                 self.path_found += 1
         iterations = 1
 
+        for obj in self.objects:
+            obj._f_x = obj.x
+            obj._f_y = obj.y
+
         while (
             self.path_found != len(self.objects) and
             iterations < self.max_iter
         ):
             self.update(1 / self.frequency, iterations)
             iterations += 1
+
+        for obj in self.objects:
+            obj.x = obj._f_x
+            obj.y = obj._f_y
 
     # Applies forces and updates objects.
     def update(self, dt, iterations):
@@ -139,3 +151,66 @@ class Engine:
         )
         self.objects.append(obj)
         return obj
+
+    def walk_path(self, step_size=3):
+        reached = sum(obj.reached for obj in self.objects)
+
+        # Initialize objects for animation.
+        for obj in self.objects:
+            obj._a_last_index = 0
+            obj._a_last_interpolation = 0
+            obj._a_remaining_distance = obj.path_length
+            obj._a_velocity = 0
+            obj._a_stopping_distance = 0
+            obj._a_pos = []
+            if obj.target is None:
+                reached += 1
+                continue
+
+        # Loop until all objects have reached to their targets.
+        while reached < len(self.objects):
+            for obj in self.objects:
+                if obj.reached or obj.target is None:
+                    continue
+
+                last_distance = obj.path[obj._a_last_index + 1][2]
+                total_disatance = (
+                    (1 - obj._a_last_interpolation) *
+                    last_distance
+                )
+
+                while total_disatance <= step_size:
+                    if obj._a_last_index >= len(obj.path) - 2:
+                        break
+                    obj._a_last_index += 1
+
+                    last_distance = obj.path[obj._a_last_index + 1][2]
+                    total_disatance += last_distance
+                else:
+                    obj._a_last_interpolation = i = 1 - (
+                        (total_disatance - step_size) /
+                        last_distance
+                    )
+                    obj._a_remaining_distance -= step_size
+
+                    prev = obj.path[obj._a_last_index]
+                    next = obj.path[obj._a_last_index + 1]
+
+                    obj._a_pos.append([
+                        interpolation(prev[0], next[0], i),
+                        interpolation(prev[1], next[1], i)
+                    ])
+                    continue
+
+                obj._a_pos.append([
+                    obj.path[-1][0],
+                    obj.path[-1][1]
+                ])
+                obj.reached = True
+                reached += 1
+
+        pos = []
+        for obj in self.objects:
+            pos.append(obj._a_pos)
+
+        return pos
